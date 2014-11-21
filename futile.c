@@ -7,8 +7,11 @@ int main()
     XButtonEvent btn;
     Window win;
     XWindowAttributes attr;
-    int screenWidth = WidthOfScreen(DefaultScreenOfDisplay(dpy));
-    int screenHeight = HeightOfScreen(DefaultScreenOfDisplay(dpy));
+    unsigned int screenWidth = WidthOfScreen(DefaultScreenOfDisplay(dpy));
+    unsigned int screenHeight = HeightOfScreen(DefaultScreenOfDisplay(dpy));
+    unsigned int winWidth;
+    unsigned int winHeight;
+    int winX,winY;
     int focus;
     XEvent ev;
     XGrabButton(dpy,1,Mod4Mask,DefaultRootWindow(dpy),False,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
@@ -31,9 +34,24 @@ int main()
             if(ev.xkey.keycode == XKeysymToKeycode(dpy,XK_Tab)) {}
             if(ev.xkey.keycode == XKeysymToKeycode(dpy,XK_x))
             {
+                int x_return, y_return;
+                unsigned int width_return,height_return,border_width_return,depth_return;
+                Window root_return;
                 XGetInputFocus(dpy,&win,&focus);
-                XResizeWindow(dpy,win,screenWidth,screenHeight);
-                XMoveWindow(dpy,win,0,0);
+                XGetGeometry(dpy,win,&root_return,&x_return,&y_return,&width_return,&height_return,&border_width_return,&depth_return);
+                if(width_return == screenWidth && height_return == screenHeight) 
+                {
+                    XMoveResizeWindow(dpy,win,winX,winY,winWidth,winHeight);
+                }
+                else 
+                {
+                    winX = x_return;
+                    winY = y_return;
+                    winWidth = width_return;
+                    winHeight = height_return;
+                    XMoveResizeWindow(dpy,win,0,0,screenWidth,screenHeight);
+                }
+                fprintf(stderr,"%ix%i",winWidth,winHeight);
             }
         }
         if(ev.type == ButtonPress && ev.xbutton.subwindow != None)
