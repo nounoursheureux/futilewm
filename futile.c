@@ -20,6 +20,7 @@ int main()
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_d),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_Tab),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_x),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
+    XGrabKey(dpy,XKeysymToKeycode(dpy,XK_c),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     btn.subwindow = None;
     for(;;)
     {
@@ -51,7 +52,11 @@ int main()
                     winHeight = height_return;
                     XMoveResizeWindow(dpy,win,0,0,screenWidth,screenHeight);
                 }
-                fprintf(stderr,"%ix%i",winWidth,winHeight);
+            }
+            if(ev.xkey.keycode == XKeysymToKeycode(dpy,XK_c))
+            {
+                XGetInputFocus(dpy,&win,&focus);
+                XDestroyWindow(dpy,win);
             }
         }
         if(ev.type == ButtonPress && ev.xbutton.subwindow != None)
