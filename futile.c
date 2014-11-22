@@ -15,13 +15,14 @@ int main()
     int focus;
     XEvent ev;
     browseWindows(dpy);
-    XGrabButton(dpy,1,Mod4Mask,DefaultRootWindow(dpy),True,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
+    XGrabButton(dpy,1,Mod4Mask,DefaultRootWindow(dpy),False,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
     XGrabButton(dpy,3,Mod4Mask,DefaultRootWindow(dpy),False,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_Return),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_d),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_Tab),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_x),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_c),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
+    XGrabKey(dpy,XKeysymToKeycode(dpy,XK_p),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     btn.subwindow = None;
     for(;;)
     {
@@ -59,6 +60,10 @@ int main()
             {
                 XGetInputFocus(dpy,&win,&focus);
                 XDestroyWindow(dpy,win);
+            }
+            if(ev.xkey.keycode == XKeysymToKeycode(dpy,XK_p))
+            {
+                create_process(launcher);
             }
         }
         if(ev.type == ButtonPress && ev.xbutton.subwindow != None)
