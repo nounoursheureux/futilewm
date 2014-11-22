@@ -14,7 +14,8 @@ int main()
     int winX,winY;
     int focus;
     XEvent ev;
-    XGrabButton(dpy,1,Mod4Mask,DefaultRootWindow(dpy),False,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
+    browseWindows(dpy);
+    XGrabButton(dpy,1,Mod4Mask,DefaultRootWindow(dpy),True,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
     XGrabButton(dpy,3,Mod4Mask,DefaultRootWindow(dpy),False,ButtonPressMask|ButtonReleaseMask|PointerMotionMask,GrabModeAsync,GrabModeAsync,None,None);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_Return),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
     XGrabKey(dpy,XKeysymToKeycode(dpy,XK_d),Mod4Mask,DefaultRootWindow(dpy),False,GrabModeAsync,GrabModeAsync);
@@ -24,6 +25,7 @@ int main()
     btn.subwindow = None;
     for(;;)
     {
+        browseWindows(dpy);
         XNextEvent(dpy,&ev);
         if(ev.type == KeyPress)
         {
@@ -63,14 +65,13 @@ int main()
         {
             XGetWindowAttributes(dpy, ev.xbutton.subwindow, &attr);
             XSetInputFocus(dpy,ev.xbutton.subwindow,RevertToParent,CurrentTime);
-            XRaiseWindow(dpy,ev.xbutton.subwindow);
             btn = ev.xbutton;
         }
         else if(ev.type == MotionNotify && btn.subwindow != None)
         {
             int xdiff = ev.xbutton.x_root - btn.x_root;
             int ydiff = ev.xbutton.y_root - btn.y_root;
-            if(btn.button == 1)
+            if(btn.button == 1 && btn.state == Mod4Mask)
             {
                 XMoveWindow(dpy,btn.subwindow, attr.x + xdiff, attr.y + ydiff);
             }
@@ -80,6 +81,14 @@ int main()
             }
         }
         else if(ev.type == ButtonRelease) btn.subwindow = None;
+        else if(ev.type == FocusIn) 
+        {
+            XRaiseWindow(dpy,ev.xfocus.window);
+        }
+        else if(ev.type == EnterNotify)
+        {
+            XSetInputFocus(dpy,ev.xfocus.window,RevertToParent,CurrentTime);
+        }
     }
     XFlush(dpy);
     sleep(10);
@@ -111,4 +120,25 @@ int create_process(char* command)
     }
     return 1;
 
+}
+
+void browseWindows(Display* dpy)
+{
+    Window root_window,parent_window;
+    Window* children_list;
+    unsigned int children_number;
+    unsigned int i;
+    XQueryTree(dpy,DefaultRootWindow(dpy),&root_window,&parent_window,&children_list,&children_number);
+    fprintf(stderr,"Nombre de fenêtres: %i",children_number);
+    if(children_number >= 1)
+    {
+        for(i = 0; i < children_number; ++i)
+        { 
+            if(i >= 1)
+            {
+                XSelectInput(dpy,children_list[i],FocusChangeMask|EnterWindowMask);
+                /*XSetWindowBorderWidth(dpy,children_list[i],3);*/
+            }
+        }
+    }
 }

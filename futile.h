@@ -10,3 +10,4 @@
 #define NIL (0)
 
 int create_process(char* command);
+void browseWindows();
